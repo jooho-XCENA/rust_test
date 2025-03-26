@@ -1,0 +1,32 @@
+# .github/workflows/update-pr-title.yml
+name: Update PR Title
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  update-pr-title:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update PR title using GitHub Script
+        uses: actions/github-script@v6
+        with:
+          script: |
+            // 기존 PR 제목을 가져옵니다.
+            const currentTitle = context.payload.pull_request.title;
+            // 새로운 제목을 생성하는 로직을 작성합니다.
+            // 예를 들어, 제목 앞에 "[FEATURE]" 접두사를 추가한다고 가정합니다.
+            const prefix = '[FEATURE] ';
+            // 이미 접두사가 없을 때만 제목을 업데이트합니다.
+            if (!currentTitle.startsWith(prefix)) {
+              const newTitle = prefix + currentTitle;
+              await github.rest.pulls.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.payload.pull_request.number,
+                title: newTitle
+              });
+            }
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
